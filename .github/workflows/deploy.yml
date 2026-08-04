@@ -2,7 +2,7 @@ name: Build and Deploy MirrorMind to EC2
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 env:
@@ -66,11 +66,11 @@ jobs:
               git init
               git remote add origin git@github.com:EGC-india/mirrormind-app.git
               git fetch --all
-              git reset --hard origin/main
+              git reset --hard origin/master
             else
               git fetch --all
-              git reset --hard origin/main
-              git pull origin main
+              git reset --hard origin/master
+              git pull origin master
             fi
 
             # Safe way to write multi-line content from a variable
