@@ -7,7 +7,6 @@ const config: CapacitorConfig = {
   server: {
     // Note: To view on an Android Emulator connected to your local server, use http://10.0.2.2:3000
     url: "https://mirror-mind-app.vercel.app/",
-    cleartext: true,
   },
 }
 
