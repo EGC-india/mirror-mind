@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
+COPY prisma ./prisma
 RUN npm install
 
 # Copy application code
@@ -19,13 +20,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package info
+# Copy package info and prisma schema
 COPY package*.json ./
-RUN npm install --omit=dev
-
-# Copy Prisma schema and generate client
 COPY prisma ./prisma
-RUN npx prisma generate
+RUN npm install --omit=dev
 
 # Copy Next.js build output and public folder
 COPY --from=build /app/.next ./.next
