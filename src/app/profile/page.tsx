@@ -5,10 +5,27 @@ import { Bell, Shield, LogOut, ChevronRight, Download, HelpCircle, History } fro
 import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import { toast } from "sonner"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export default function ProfilePage() {
   const [stats, setStats] = useState({ total: 0, good: 0, avgConfidence: 0 })
   const [showLogout, setShowLogout] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [hasPassword, setHasPassword] = useState<boolean | null>(null)
+  const [password, setPassword] = useState("")
+  const [confirmText, setConfirmText] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [checkingAccountType, setCheckingAccountType] = useState(false)
 
   const { data: session } = useSession()
 
@@ -81,6 +98,69 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Failed to export decisions", error)
       toast.error("Failed to export decisions. Please try again.")
+    }
+  }
+
+  const handleOpenDeleteModal = async () => {
+    setCheckingAccountType(true)
+    try {
+      const res = await fetch("/api/account/delete")
+      if (res.ok) {
+        const data = await res.json()
+        setHasPassword(data.hasPassword)
+        setIsDeleteModalOpen(true)
+      } else {
+        toast.error("Failed to verify account settings. Please try again.")
+      }
+    } catch (err) {
+      toast.error("Failed to verify account settings. Please try again.")
+    } finally {
+      setCheckingAccountType(false)
+    }
+  }
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+    setPassword("")
+    setConfirmText("")
+    setDeleteError(null)
+  }
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true)
+    setDeleteError(null)
+    try {
+      const payload: { password?: string } = {}
+      if (hasPassword) {
+        payload.password = password
+      }
+
+      const res = await fetch("/api/account/delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (res.ok) {
+        toast.success("Account deleted successfully.")
+        setIsDeleteModalOpen(false)
+        await signOut({ callbackUrl: "/account-deleted" })
+      } else {
+        const data = await res.json().catch(() => ({}))
+        if (res.status === 403) {
+          setDeleteError("Incorrect password.")
+        } else if (res.status === 400) {
+          setDeleteError("Password is required.")
+        } else {
+          setDeleteError(data.error || "Something went wrong, please try again.")
+        }
+      }
+    } catch (err) {
+      setDeleteError("Something went wrong, please try again.")
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -170,6 +250,21 @@ export default function ProfilePage() {
           <LogOut size={16} />
           Log Out
         </button>
+
+        {/* Danger Zone */}
+        <div className="mt-8 p-6 bg-red-950/10 border border-red-900/20 rounded-2xl">
+          <h3 className="text-red-400 font-bold text-base mb-2">Delete Account</h3>
+          <p className="text-zinc-500 text-sm mb-4">
+            Permanently delete your account and all associated data, including decision history, episodic memories, and companion messages. This action cannot be undone.
+          </p>
+          <button
+            onClick={handleOpenDeleteModal}
+            disabled={checkingAccountType}
+            className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold py-4 rounded-2xl text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {checkingAccountType ? "Checking..." : "Delete Account"}
+          </button>
+        </div>
       </div>
 
       {/* Logout modal */}
@@ -198,6 +293,78 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Delete Account Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={(open) => { if (!open) handleCloseDeleteModal() }}>
+        <DialogContent className="bg-[#1a1a27] border-white/10 text-white max-w-sm rounded-[32px] p-6">
+          <DialogHeader>
+            <DialogTitle className="text-white font-bold text-xl text-center">Delete Account?</DialogTitle>
+            <DialogDescription className="text-zinc-400 text-sm text-center mt-2">
+              This action is permanent and irreversible. It will delete all your decisions, reflections, and profile data.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="my-4 space-y-4">
+            {hasPassword ? (
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400">
+                  Confirm Password
+                </label>
+                <Input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-[#13131e] border-white/10 text-white focus-visible:ring-violet-500 rounded-xl"
+                  disabled={isDeleting}
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400">
+                  Type <span className="text-red-400 font-bold select-all">DELETE</span> to confirm
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Type DELETE"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  className="bg-[#13131e] border-white/10 text-white focus-visible:ring-violet-500 rounded-xl uppercase"
+                  disabled={isDeleting}
+                />
+              </div>
+            )}
+
+            {deleteError && (
+              <p className="text-red-400 text-xs font-semibold text-center bg-red-950/10 border border-red-900/20 py-2 rounded-xl">
+                {deleteError}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className="flex flex-col gap-2 sm:flex-col sm:space-x-0">
+            <Button
+              onClick={handleDeleteAccount}
+              disabled={
+                isDeleting ||
+                (hasPassword ? !password : confirmText !== "DELETE")
+              }
+              variant="destructive"
+              className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold py-4 h-auto rounded-2xl text-sm transition-colors border-none"
+            >
+              {isDeleting ? "Deleting..." : "Confirm Delete"}
+            </Button>
+            <Button
+              onClick={handleCloseDeleteModal}
+              disabled={isDeleting}
+              variant="outline"
+              className="w-full bg-[#13131e] border border-white/8 hover:bg-white/5 hover:text-white text-zinc-300 font-bold py-4 h-auto rounded-2xl text-sm transition-colors"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

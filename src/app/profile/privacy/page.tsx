@@ -134,7 +134,7 @@ export default function PrivacyPage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="bg-red-950/10 border border-red-900/20 rounded-2xl p-4">
+        {/* <div className="bg-red-950/10 border border-red-900/20 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle size={16} className="text-red-400" />
             <h3 className="text-red-400 text-sm font-bold">Danger Zone</h3>
@@ -150,7 +150,7 @@ export default function PrivacyPage() {
             <Trash2 size={14} />
             Clear Decision Archive
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Confirmation Modal */}
