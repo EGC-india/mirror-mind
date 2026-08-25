@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
-import { ChatOpenAI } from "@langchain/openai"
+import { ChatAnthropic } from "@langchain/anthropic"
 import { ChatPromptTemplate } from "@langchain/core/prompts"
 
 export const dynamic = "force-dynamic"
@@ -42,13 +42,9 @@ export async function POST(req: Request) {
     }
 
     // Initialize LangChain ChatOpenAI
-    const llm = new ChatOpenAI({
-      apiKey: process.env.AI_API_KEY,
-      configuration: {
-        apiKey: process.env.AI_API_KEY,
-        baseURL: process.env.AI_BASE_URL + "/v1",
-      },
-      modelName: process.env.AI_MODEL || "claude-sonnet-4-6",
+    const llm = new ChatAnthropic({
+      anthropicApiKey: process.env.AI_API_KEY,
+      modelName: process.env.AI_MODEL || "claude-3-5-sonnet-20241022",
       temperature: 0.4, // slightly higher temperature for creative alternate timeline/persona dialogue
     })
 
