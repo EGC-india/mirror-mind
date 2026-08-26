@@ -1,15 +1,11 @@
 import { prisma } from "@/lib/prisma"
-import { ChatOpenAI } from "@langchain/openai"
+import { ChatAnthropic } from "@langchain/anthropic"
 import { EMOTION_ANALYSIS_PROMPT } from "@/prompts/emotion"
 
 export class EmotionService {
-  private static llm = new ChatOpenAI({
-    apiKey: process.env.AI_API_KEY,
-    configuration: {
-      apiKey: process.env.AI_API_KEY,
-      baseURL: process.env.AI_BASE_URL + "/v1",
-    },
-    modelName: process.env.AI_MODEL || "claude-sonnet-4-6",
+  private static llm = new ChatAnthropic({
+    anthropicApiKey: process.env.AI_API_KEY,
+    modelName: process.env.AI_MODEL || "claude-3-5-sonnet-20241022",
     temperature: 0.1,
   })
 

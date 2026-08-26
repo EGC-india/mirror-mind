@@ -98,7 +98,7 @@ export default function PrivacyPage() {
             <div>
               <h3 className="text-white text-sm font-bold">Zero-Data-Retention LLM Calls</h3>
               <p className="text-zinc-500 text-xs mt-1 leading-relaxed">
-                Our AI connections to OpenAI and Anthropic are designated under enterprise policies:
+                Our AI connections to Anthropic are designated under enterprise policies:
                 your inputs are never cached for training public LLM models.
               </p>
             </div>

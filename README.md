@@ -120,14 +120,11 @@ NEXTAUTH_SECRET=""
 NEXTAUTH_URL="http://localhost:3000"
 
 # ─── AI ──────────────────────────────────────────────────────
-# Your API key from freemodel.dev (or any OpenAI-compatible provider)
+# Your API key from platform.claude.com
 AI_API_KEY=""
 
-# Base URL for the AI provider
-AI_BASE_URL="https://api.freemodel.dev"
-
 # The model to use for AI inference
-AI_MODEL="claude-sonnet-4-6"
+AI_MODEL="claude-3-5-sonnet-20241022"
 ```
 
 > **Tip:** Never commit your `.env` file to version control. The `.gitignore` already excludes it.
