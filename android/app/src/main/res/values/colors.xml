@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_offline">#090A13</color>
+    <color name="purple_accent">#8b5cf6</color>
+    <color name="text_heading">#ffffff</color>
+    <color name="text_subtext">#a0a2b1</color>
+</resources>

@@ -105,7 +105,7 @@ export default function LoginPage() {
         <span className="text-zinc-700 text-xs">or continue with</span>
         <div className="flex-1 h-px bg-white/6" />
       </div>
-
+      {/* 
       <button className="w-full bg-[#13131e] border border-white/8 text-zinc-300 text-sm font-medium py-3.5 rounded-2xl flex items-center justify-center gap-2 mb-8 hover:bg-white/5 transition-colors">
         <svg width="18" height="18" viewBox="0 0 24 24">
           <path
@@ -126,7 +126,7 @@ export default function LoginPage() {
           />
         </svg>
         Sign in with Google
-      </button>
+      </button> */}
 
       <p className="text-zinc-600 text-xs text-center mb-10">
         Don't have an account?{" "}
