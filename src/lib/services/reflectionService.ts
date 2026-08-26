@@ -3,11 +3,17 @@ import { ChatAnthropic } from "@langchain/anthropic"
 import { REFLECTION_ENGINE_PROMPT } from "@/prompts/reflection"
 
 export class ReflectionService {
-  private static llm = new ChatAnthropic({
-    anthropicApiKey: process.env.AI_API_KEY,
-    modelName: process.env.AI_MODEL || "claude-3-5-sonnet-20241022",
-    temperature: 0.2,
-  })
+  private static _llm: ChatAnthropic | null = null;
+  private static get llm() {
+    if (!this._llm) {
+      this._llm = new ChatAnthropic({
+        anthropicApiKey: process.env.AI_API_KEY || "dummy_key_for_build",
+        modelName: process.env.AI_MODEL || "claude-3-5-sonnet-20241022",
+        temperature: 0.2,
+      });
+    }
+    return this._llm;
+  }
 
   /**
    * Generates a new deep behavioral ReflectionReport for the user.
