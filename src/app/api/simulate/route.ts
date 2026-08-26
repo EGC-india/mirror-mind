@@ -241,6 +241,6 @@ Do not wrap the JSON in markdown code blocks. Output only raw JSON.`
     })
   } catch (error: unknown) {
     console.error("Simulation route error:", error)
-    return NextResponse.json({ error: "Simulation failed: " + error.message }, { status: 500 })
+    return NextResponse.json({ error: "Simulation failed: " + (error instanceof Error ? error.message : String(error)) }, { status: 500 })
   }
 }
