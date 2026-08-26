@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import dynamic from "next/dynamic"
@@ -70,6 +71,7 @@ interface EpisodicMemory {
 
 export default function CompanionPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [messages, setMessages] = useState<Message[]>([])
   const [profile, setProfile] = useState<ProfileMemory | null>(null)
   const [episodics, setEpisodics] = useState<EpisodicMemory[]>([])
@@ -112,7 +114,12 @@ export default function CompanionPage() {
         : [],
       reply: replyMatch
         ? replyMatch[1].trim()
-        : content.replace(/\[(?:EMOTION|TITLE|INSIGHTS|PATTERNS|SUGGESTIONS)\][^\n]*/gi, "").trim(),
+        : content.includes("[REPLY]")
+        ? ""
+        : content
+            .replace(/\[(EMOTION|TITLE|INSIGHTS|PATTERNS|SUGGESTIONS)\][\s\S]*?(?=\n\[(EMOTION|TITLE|INSIGHTS|PATTERNS|SUGGESTIONS|REPLY)\]|$)/gi, "")
+            .replace(/\[[A-Z]+\][^\n]*/gi, "")
+            .trim(),
     }
   }
 
@@ -281,10 +288,11 @@ export default function CompanionPage() {
   const getSuggestions = () => {
     if (!profile) return []
     const stage = profile.onboardingStage
+    const userName = session?.user?.name || profile.preferredName || profile.name || "User"
     if (stage === 1) {
       return [
         "I'm ready. Let's do this!",
-        "My name is Swapnil.",
+        `My name is ${userName}.`,
         "What kind of details do you need?",
       ]
     }
@@ -716,7 +724,7 @@ export default function CompanionPage() {
 
                           <div className="prose prose-invert prose-p:leading-relaxed prose-p:text-xs prose-strong:text-violet-300 text-zinc-200">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {parsed?.reply || m.content}
+                              {parsed ? parsed.reply : m.content}
                             </ReactMarkdown>
                           </div>
 

@@ -277,13 +277,10 @@ export async function POST(req: Request) {
         .replace("{localTime}", new Date().toLocaleDateString())
     }
 
+    const fullSystemInstruction = `${systemInstructions}\n\nDetected Emotional State: ${emotionState}. Behavioral Cues: ${behaviorCues || "normal"}.\n\n${FORMAT_INSTRUCTIONS}`
+
     const conversationPrompt = ChatPromptTemplate.fromMessages([
-      ["system", systemInstructions],
-      [
-        "system",
-        `Detected Emotional State: ${emotionState}. Behavioral Cues: ${behaviorCues || "normal"}.`,
-      ],
-      ["system", FORMAT_INSTRUCTIONS],
+      ["system", fullSystemInstruction],
       [
         "user",
         `Latest Message: "${message}"\n\nHistory Context:\n{history}\n\nMirrorMind, stream your response:`,
