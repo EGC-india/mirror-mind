@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ArrowLeft, Shield, Eye, Database, AlertCircle, Trash2 } from "lucide-react"
+import { ArrowLeft, Shield, Eye, Database, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
@@ -15,7 +15,10 @@ export default function PrivacyPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setUserAgent(window.navigator.userAgent) // eslint-disable-line react-hooks/exhaustive-deps
+      const timeoutId = setTimeout(() => {
+        setUserAgent(window.navigator.userAgent)
+      }, 0)
+      return () => clearTimeout(timeoutId)
     }
   }, [])
 

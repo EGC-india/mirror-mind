@@ -83,10 +83,13 @@ function HistoryPageContent() {
 
   useEffect(() => {
     if (selectedDecision) {
-      setEditOutcome(selectedDecision.outcome || "pending") // eslint-disable-line react-hooks/exhaustive-deps
-      setEditRegret(selectedDecision.regretScore || 0)
-      setEditEmotion(selectedDecision.emotion || "Neutral")
-      setEditStress(selectedDecision.stressLevel || 5)
+      const timeoutId = setTimeout(() => {
+        setEditOutcome(selectedDecision.outcome || "pending")
+        setEditRegret(selectedDecision.regretScore || 0)
+        setEditEmotion(selectedDecision.emotion || "Neutral")
+        setEditStress(selectedDecision.stressLevel || 5)
+      }, 0)
+      return () => clearTimeout(timeoutId)
     }
   }, [selectedDecision])
 
