@@ -120,27 +120,23 @@ export default function SimulatePage() {
   const [personaQuery, setPersonaQuery] = useState("")
   const [whyQuestion, setWhyQuestion] = useState("")
 
-  async function checkDecisions() {
-    try {
-      const res = await fetch("/api/decisions")
-      const data = await res.json()
-      if (Array.isArray(data)) {
-        setDecisions(data)
-        setHasDecisions(data.length > 0)
-        if (data.length > 0 && !selectedDecisionId) {
-          setSelectedDecisionId(data[0].id)
+  useEffect(() => {
+    async function fetchDecisions() {
+      try {
+        const res = await fetch("/api/decisions")
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          setDecisions(data)
+          setHasDecisions(data.length > 0)
+          setSelectedDecisionId((prev) => prev ? prev : (data.length > 0 ? data[0].id : ""))
+        } else {
+          setHasDecisions(false)
         }
-      } else {
+      } catch (e) {
         setHasDecisions(false)
       }
-    } catch (e) {
-      setHasDecisions(false)
     }
-  }
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    checkDecisions()
+    fetchDecisions()
   }, [])
 
   async function handleSimulate(modeOverride?: string) {
@@ -242,7 +238,19 @@ export default function SimulatePage() {
         }
 
         toast.success("Cognitive profile created successfully!")
-        await checkDecisions()
+        try {
+          const resDec = await fetch("/api/decisions")
+          const dataDec = await resDec.json()
+          if (Array.isArray(dataDec)) {
+            setDecisions(dataDec)
+            setHasDecisions(dataDec.length > 0)
+            setSelectedDecisionId((prev) => prev ? prev : (dataDec.length > 0 ? dataDec[0].id : ""))
+          } else {
+            setHasDecisions(false)
+          }
+        } catch (e) {
+          setHasDecisions(false)
+        }
         setOnboardingActive(false)
       } catch (err) {
         console.error(err)
