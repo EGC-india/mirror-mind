@@ -15,7 +15,7 @@ export default function PrivacyPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setUserAgent(window.navigator.userAgent)
+      setUserAgent(window.navigator.userAgent) // eslint-disable-line react-hooks/exhaustive-deps
     }
   }, [])
 

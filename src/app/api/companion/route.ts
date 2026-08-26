@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     // Fetch or create profile memory
     const profile = await MemoryService.getOrCreateProfile(userId)
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     const body = await req.json()
     // Support custom payload `{ message }` or Vercel AI SDK `{ messages }` payload
@@ -66,8 +66,7 @@ export async function POST(req: Request) {
     // Initialize LLM
     const llm = new ChatAnthropic({
       anthropicApiKey: process.env.AI_API_KEY,
-      modelName: process.env.AI_MODEL || "claude-3-5-sonnet-20241022",
-      temperature: 0.3,
+      modelName: process.env.AI_MODEL || "claude-sonnet-5",
     })
 
     // Save user message immediately to establish continuity
@@ -80,7 +79,7 @@ export async function POST(req: Request) {
     })
 
     // --- NODE 1: Fetch Profile & Session Context ---
-    let profile = await MemoryService.getOrCreateProfile(userId)
+    const profile = await MemoryService.getOrCreateProfile(userId)
 
     // Get chat history (last 15 messages)
     const historyMessages = await prisma.companionMessage.findMany({
@@ -89,7 +88,7 @@ export async function POST(req: Request) {
       take: 15,
     })
     const formattedHistory = historyMessages
-      .map((m: any) => `${m.role === "user" ? "User" : "MirrorMind"}: ${m.content}`)
+      .map((m: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => `${m.role === "user" ? "User" : "MirrorMind"}: ${m.content}`)
       .join("\n")
 
     // Get user's resolved decisions (to check for patterns)
@@ -109,7 +108,7 @@ export async function POST(req: Request) {
     const episodicMemories = await MemoryService.getEpisodicMemories(userId, 10)
     const formattedEpisodics = episodicMemories
       .map(
-        (e: any) =>
+        (e: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) =>
           `- ${e.event} (Importance: ${e.importance}/10, Emotion: ${e.emotion || "neutral"})`
       )
       .join("\n")
@@ -143,7 +142,7 @@ export async function POST(req: Request) {
         const currentEmotion = emotionAnalysis.dominantEmotion
 
         // B. Onboarding Extraction & Stage Advancement
-        let profileUpdate: any = {}
+        let profileUpdate: any /* eslint-disable-line @typescript-eslint/no-explicit-any */ = {}
         let nextStage = onboardingStage
 
         if (onboardingStage < 6) {
@@ -156,7 +155,8 @@ export async function POST(req: Request) {
 
           try {
             const parserResponse = await llm.invoke(extractionPrompt)
-            const parsedText = (parserResponse.content as string).trim()
+            const content = parserResponse.content;
+            const parsedText = (typeof content === 'string' ? content : (Array.isArray(content) ? content.map((c: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => c.type === 'text' ? c.text : '').join('') : '')).trim()
 
             let cleanParsed = parsedText
             if (cleanParsed.startsWith("```json")) cleanParsed = cleanParsed.slice(7)
@@ -177,7 +177,7 @@ export async function POST(req: Request) {
         }
 
         // C. Save Structured Memory Updates & Episodic Spikes
-        const updatePayload: any = {}
+        const updatePayload: any /* eslint-disable-line @typescript-eslint/no-explicit-any */ = {}
         if (profileUpdate.name) updatePayload.name = profileUpdate.name
         if (profileUpdate.preferredName) updatePayload.preferredName = profileUpdate.preferredName
         if (profileUpdate.age) updatePayload.age = parseInt(profileUpdate.age)
@@ -206,7 +206,7 @@ export async function POST(req: Request) {
         ]
         for (const field of arrayFields) {
           if (Array.isArray(profileUpdate[field]) && profileUpdate[field].length > 0) {
-            const existing = (profile as any)[field] || []
+            const existing = (profile as unknown as Record<string, unknown[]>)[field] || []
             const combined = Array.from(new Set([...existing, ...profileUpdate[field]]))
             updatePayload[field] = combined
           }
@@ -297,7 +297,8 @@ export async function POST(req: Request) {
     const customStream = new ReadableStream({
       async start(controller) {
         for await (const chunk of stream) {
-          const textChunk = chunk.content as string
+          const content = chunk.content;
+          const textChunk = typeof content === 'string' ? content : (Array.isArray(content) ? content.map((c: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => c.type === 'text' ? c.text : '').join('') : '');
           accumulatedText += textChunk
           controller.enqueue(textChunk)
         }

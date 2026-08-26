@@ -12,7 +12,7 @@ export async function GET() {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     // Fetch decisions of this user
     const decisions = await prisma.decision.findMany({
@@ -37,13 +37,12 @@ export async function GET() {
     // Initialize LangChain ChatOpenAI
     const llm = new ChatAnthropic({
       anthropicApiKey: process.env.AI_API_KEY,
-      modelName: process.env.AI_MODEL || "claude-3-5-sonnet-20241022",
-      temperature: 0.2,
+      modelName: process.env.AI_MODEL || "claude-sonnet-5",
     })
 
     // Format decisions history for context
     const historyText = decisions
-      .map((d: any, index) => {
+      .map((d: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, index) => {
         return `Decision #${index + 1}:
 Title: ${d.title}
 Category: ${d.category}
@@ -143,10 +142,10 @@ Do not wrap the JSON in markdown code blocks like \`\`\`json. Output only the ra
       cognitiveBiases: result.cognitiveBiases || [],
       emotionalInsights: result.emotionalInsights || [],
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Patterns API error:", error)
     return NextResponse.json(
-      { error: "Failed to compile patterns: " + error.message },
+      { error: "Failed to compile patterns: " + (error instanceof Error ? error.message : String(error)) },
       { status: 500 }
     )
   }

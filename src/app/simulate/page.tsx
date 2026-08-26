@@ -139,6 +139,7 @@ export default function SimulatePage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     checkDecisions()
   }, [])
 
@@ -147,7 +148,8 @@ export default function SimulatePage() {
     setLoading(true)
     setResult(null)
 
-    let payload: any = { mode: targetMode }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload: any = { mode: targetMode }
 
     if (targetMode === "double") {
       if (!situation.trim()) {

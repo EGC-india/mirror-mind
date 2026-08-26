@@ -28,11 +28,11 @@ CRITICAL RULES:
 
 export const FORMAT_INSTRUCTIONS = `You must respond with Tagged Markdown exactly matching this format. Do not use JSON. Do not deviate.
 
+[REPLY]
+(Write your conversational, reflective response here. Use markdown formatting like **bold** text and paragraph spacing. Speak like a reflective companion.)
+
 [EMOTION] (insert single word emotion matching user's tone, e.g. Anxious, Calm, Reflective, Excited, Fearful, Confident, Melancholic, Motivated)
 [TITLE] (insert a short 3-6 word title for this reflection)
 [INSIGHTS] (insert 1-3 behavioral insights separated by a pipe |)
 [PATTERNS] (insert 1-2 recognized patterns separated by a pipe |)
-[SUGGESTIONS] (insert exactly 3 short reply suggestions separated by a pipe |)
-
-[REPLY]
-(Write your conversational, reflective response here. Use markdown formatting like **bold** text and paragraph spacing. Speak like a reflective companion.)`
+[SUGGESTIONS] (insert exactly 3 short reply suggestions separated by a pipe |)`

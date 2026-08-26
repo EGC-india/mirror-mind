@@ -30,8 +30,14 @@ export default function DashboardPage() {
   const [latestReflection, setLatestReflection] = useState<any | null>(null)
   const [emotionalState, setEmotionalState] = useState<string>("Calm")
   const [loading, setLoading] = useState(true)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/")
+    }
+  }, [status, router])
 
   useEffect(() => {
     async function fetchData() {
@@ -52,9 +58,9 @@ export default function DashboardPage() {
 
           const total = decData.length
           const avgConfidence = total
-            ? Math.round(decData.reduce((acc: number, d: any) => acc + d.confidence, 0) / total)
+            ? Math.round(decData.reduce((acc: number, d: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => acc + d.confidence, 0) / total)
             : 0
-          const goodOutcomes = decData.filter((d: any) => d.outcome === "good").length
+          const goodOutcomes = decData.filter((d: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => d.outcome === "good").length
 
           setStats({ total, avgConfidence, goodOutcomes })
         }
@@ -82,6 +88,15 @@ export default function DashboardPage() {
     }
     fetchData()
   }, [router])
+
+  if (status === "loading" || status === "unauthenticated") {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#080810] items-center justify-center text-zinc-500 text-xs">
+        <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin mb-3" />
+        Authenticating...
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#080810] text-white">

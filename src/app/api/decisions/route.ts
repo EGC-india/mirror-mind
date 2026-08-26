@@ -10,14 +10,14 @@ export async function GET(req: Request) {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     const { searchParams } = new URL(req.url)
     const category = searchParams.get("category")
     const outcome = searchParams.get("outcome")
     const search = searchParams.get("search")
 
-    const where: any = { userId }
+    const where: any /* eslint-disable-line @typescript-eslint/no-explicit-any */ = { userId }
     if (category) where.category = category
     if (outcome) where.outcome = outcome
     if (search) {
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     const body = await req.json()
     const decision = await prisma.decision.create({
@@ -73,7 +73,7 @@ export async function PATCH(req: Request) {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     const body = await req.json()
     const { id, outcome, regretScore, emotion, stressLevel } = body
@@ -113,7 +113,7 @@ export async function DELETE(req: Request) {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     const { searchParams } = new URL(req.url)
     const id = searchParams.get("id")

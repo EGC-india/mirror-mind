@@ -8,8 +8,7 @@ export class ReflectionService {
     if (!this._llm) {
       this._llm = new ChatAnthropic({
         anthropicApiKey: process.env.AI_API_KEY || "dummy_key_for_build",
-        modelName: process.env.AI_MODEL || "claude-3-5-sonnet-20241022",
-        temperature: 0.2,
+        modelName: process.env.AI_MODEL || "claude-sonnet-5",
       });
     }
     return this._llm;
@@ -93,7 +92,8 @@ export class ReflectionService {
 
       // 7. Invoke Claude
       const response = await this.llm.invoke(prompt)
-      const rawContent = (response.content as string).trim()
+      const content = response.content;
+      const rawContent = (typeof content === 'string' ? content : (Array.isArray(content) ? content.map((c: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => c.type === 'text' ? c.text : '').join('') : '')).trim()
 
       let cleanContent = rawContent
       if (cleanContent.startsWith("```json")) {

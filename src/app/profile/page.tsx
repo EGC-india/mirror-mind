@@ -16,7 +16,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
+import { useRouter } from "next/navigation"
+
 export default function ProfilePage() {
+  const router = useRouter()
   const [stats, setStats] = useState({ total: 0, good: 0, avgConfidence: 0 })
   const [showLogout, setShowLogout] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -27,7 +30,13 @@ export default function ProfilePage() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [checkingAccountType, setCheckingAccountType] = useState(false)
 
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/")
+    }
+  }, [status, router])
 
   useEffect(() => {
     async function fetchData() {
@@ -36,9 +45,9 @@ export default function ProfilePage() {
         const data = await res.json()
         if (Array.isArray(data)) {
           const total = data.length
-          const good = data.filter((d: any) => d.outcome === "good").length
+          const good = data.filter((d: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => d.outcome === "good").length
           const avgConfidence = total
-            ? Math.round(data.reduce((acc: number, d: any) => acc + d.confidence, 0) / total)
+            ? Math.round(data.reduce((acc: number, d: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => acc + d.confidence, 0) / total)
             : 0
           setStats({ total, good, avgConfidence })
         }
@@ -191,6 +200,15 @@ export default function ProfilePage() {
       href: "/profile/support",
     },
   ]
+
+  if (status === "loading" || status === "unauthenticated") {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#080810] items-center justify-center text-zinc-500 text-xs">
+        <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin mb-3" />
+        Authenticating...
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#080810] text-white">

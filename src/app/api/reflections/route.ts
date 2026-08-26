@@ -11,7 +11,7 @@ export async function GET() {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     const reports = await ReflectionService.getHistory(userId, 5)
     return NextResponse.json(reports)
@@ -28,7 +28,7 @@ export async function POST() {
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const userId = (session.user as any).id
+    const userId = session.user.id
 
     const report = await ReflectionService.generateReport(userId)
     if (!report) {

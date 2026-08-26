@@ -12,7 +12,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -39,7 +39,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -55,7 +55,7 @@ export async function DELETE(req: Request) {
 
     // If the user has a password set (credentials account), require and verify it
     if (user.password) {
-      let body: any
+      let body: any /* eslint-disable-line @typescript-eslint/no-explicit-any */
       try {
         body = await req.json()
       } catch (error) {

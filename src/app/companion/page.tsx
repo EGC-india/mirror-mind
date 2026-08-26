@@ -71,7 +71,13 @@ interface EpisodicMemory {
 
 export default function CompanionPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/")
+    }
+  }, [status, router])
   const [messages, setMessages] = useState<Message[]>([])
   const [profile, setProfile] = useState<ProfileMemory | null>(null)
   const [episodics, setEpisodics] = useState<EpisodicMemory[]>([])
@@ -84,42 +90,32 @@ export default function CompanionPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const parseTaggedMarkdown = (content: string) => {
-    const emotionMatch = content.match(/\[EMOTION\]\s*(.*)/i)
-    const titleMatch = content.match(/\[TITLE\]\s*(.*)/i)
-    const insightsMatch = content.match(/\[INSIGHTS\]\s*(.*)/i)
-    const patternsMatch = content.match(/\[PATTERNS\]\s*(.*)/i)
-    const suggestionsMatch = content.match(/\[SUGGESTIONS\]\s*(.*)/i)
-    const replyMatch = content.match(/\[REPLY\]([\s\S]*)/i)
+    const getTagContent = (tag: string) => {
+      const regex = new RegExp(`\\[${tag}\\]([\\s\\S]*?)(?=\\n\\[|$)`, "i")
+      const match = content.match(regex)
+      return match ? match[1].trim() : null
+    }
+
+    const emotion = getTagContent("EMOTION")
+    const title = getTagContent("TITLE")
+    const insightsStr = getTagContent("INSIGHTS")
+    const patternsStr = getTagContent("PATTERNS")
+    const suggestionsStr = getTagContent("SUGGESTIONS")
+    let reply = getTagContent("REPLY")
+
+    if (reply === null) {
+      reply = content
+        .replace(/\[(EMOTION|TITLE|INSIGHTS|PATTERNS|SUGGESTIONS)\][\s\S]*?(?=\n\[|$)/gi, "")
+        .trim()
+    }
 
     return {
-      emotion: emotionMatch ? emotionMatch[1].trim() : null,
-      title: titleMatch ? titleMatch[1].trim() : null,
-      insights: insightsMatch
-        ? insightsMatch[1]
-            .split("|")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [],
-      patterns: patternsMatch
-        ? patternsMatch[1]
-            .split("|")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [],
-      suggestions: suggestionsMatch
-        ? suggestionsMatch[1]
-            .split("|")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [],
-      reply: replyMatch
-        ? replyMatch[1].trim()
-        : content.includes("[REPLY]")
-        ? ""
-        : content
-            .replace(/\[(EMOTION|TITLE|INSIGHTS|PATTERNS|SUGGESTIONS)\][\s\S]*?(?=\n\[(EMOTION|TITLE|INSIGHTS|PATTERNS|SUGGESTIONS|REPLY)\]|$)/gi, "")
-            .replace(/\[[A-Z]+\][^\n]*/gi, "")
-            .trim(),
+      emotion,
+      title,
+      insights: insightsStr ? insightsStr.split("|").map((s) => s.trim()).filter(Boolean) : [],
+      patterns: patternsStr ? patternsStr.split("|").map((s) => s.trim()).filter(Boolean) : [],
+      suggestions: suggestionsStr ? suggestionsStr.split("|").map((s) => s.trim()).filter(Boolean) : [],
+      reply,
     }
   }
 
@@ -134,6 +130,7 @@ export default function CompanionPage() {
 
           if (data.messages && data.messages.length > 0) {
             setMessages(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               data.messages.map((m: any) => ({
                 id: m.id,
                 role: m.role,
@@ -176,7 +173,7 @@ export default function CompanionPage() {
       }
     }
     initData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])  
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
@@ -191,7 +188,7 @@ export default function CompanionPage() {
     }
 
     const userMsg: Message = {
-      id: `user-temp-${Date.now()}`,
+      id: `user-temp-${crypto.randomUUID()}`,
       role: "user",
       content: textToSend,
       createdAt: new Date().toISOString(),
@@ -218,7 +215,7 @@ export default function CompanionPage() {
       setMessages((prev) => [
         ...prev,
         {
-          id: `assistant-temp-${Date.now()}`,
+          id: `assistant-temp-${crypto.randomUUID()}`,
           role: "assistant",
           content: "",
           createdAt: new Date().toISOString(),
@@ -229,7 +226,7 @@ export default function CompanionPage() {
         const { done, value } = await reader.read()
         if (done) break
         const chunk = decoder.decode(value, { stream: true })
-        assistantContent += chunk
+        assistantContent = assistantContent + chunk
 
         setMessages((prev) => {
           const newMsgs = [...prev]
@@ -538,6 +535,15 @@ export default function CompanionPage() {
             )}
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (status === "loading" || status === "unauthenticated") {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#080810] items-center justify-center text-zinc-500 text-xs">
+        <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin mb-3" />
+        Authenticating...
       </div>
     )
   }

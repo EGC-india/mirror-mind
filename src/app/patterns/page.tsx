@@ -85,7 +85,7 @@ export default function PatternsPage() {
   // Derived Statistics for Profiles/Analytics
   const total = decisions.length
 
-  const catStats = decisions.reduce((acc: any, d: any) => {
+  const catStats = decisions.reduce((acc: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, d: any) => {
     acc[d.category] = (acc[d.category] || 0) + 1
     return acc
   }, {})
@@ -108,7 +108,7 @@ export default function PatternsPage() {
     : "5.0"
 
   // Regret stats
-  const catRegretStats = decisions.reduce((acc: any, d: any) => {
+  const catRegretStats = decisions.reduce((acc: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, d: any) => {
     if (d.outcome !== "pending" && d.regretScore !== undefined) {
       if (!acc[d.category]) acc[d.category] = { sum: 0, count: 0 }
       acc[d.category].sum += d.regretScore
