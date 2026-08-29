@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     // Initialize LangChain ChatOpenAI
     const llm = new ChatAnthropic({
       anthropicApiKey: process.env.AI_API_KEY,
-      modelName: process.env.AI_MODEL || "claude-sonnet-5",
+      modelName: process.env.AI_MODEL || "claude-haiku-4-5",
     })
 
     // Format decisions history for context

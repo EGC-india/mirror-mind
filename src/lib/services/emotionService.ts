@@ -8,7 +8,7 @@ export class EmotionService {
     if (!this._llm) {
       this._llm = new ChatAnthropic({
         anthropicApiKey: process.env.AI_API_KEY || "dummy_key_for_build",
-        modelName: process.env.AI_MODEL || "claude-sonnet-5",
+        modelName: process.env.AI_MODEL || "claude-haiku-4-5",
       });
     }
     return this._llm;
