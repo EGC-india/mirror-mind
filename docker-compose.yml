@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mirrormind:
-    image: ghcr.io/swapnilmk/mirror-mind:latest
+    image: ghcr.io/egc-india/mirror-mind:latest
     container_name: mirrormind
     restart: always
     ports:
