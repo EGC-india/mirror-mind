@@ -2,13 +2,18 @@ version: '3.8'
 
 services:
   mirrormind:
-    build: .
-    image: ghcr.io/egc-india/mirrormind-app:latest
+    image: ghcr.io/swapnilmk/mirror-mind:latest
     container_name: mirrormind
     restart: always
     ports:
-      - "3004:3000"
+      - "3011:3000"
     environment:
       - NODE_ENV=production
+      - PORT=3000
+      - NODE_OPTIONS=--max-old-space-size=256
     env_file:
       - .env
+    deploy:
+      resources:
+        limits:
+          memory: 350M
